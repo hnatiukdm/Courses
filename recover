@@ -1,0 +1,41 @@
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+# Your branch and 'origin/master' have diverged,
+# and have 1 and 1 different commit each, respectively.
+#   (use "git pull" to merge the remote branch into yours)
+#
+# Changes to be committed:
+#   (use "git reset HEAD <file>..." to unstage)
+#
+#	new file:   .gitignore
+#
+# Changes not staged for commit:
+#   (use "git add/rm <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+#	modified:   JSCourse/.DS_Store
+#	modified:   JSCourse/2_HTML/.DS_Store
+#	deleted:    JSCourse/2_HTML/.idea/.name
+#	deleted:    JSCourse/2_HTML/.idea/2_HTML.iml
+#	deleted:    JSCourse/2_HTML/.idea/encodings.xml
+#	deleted:    JSCourse/2_HTML/.idea/misc.xml
+#	deleted:    JSCourse/2_HTML/.idea/modules.xml
+#	deleted:    JSCourse/2_HTML/.idea/scopes/scope_settings.xml
+#	deleted:    JSCourse/2_HTML/.idea/vcs.xml
+#	deleted:    JSCourse/2_HTML/.idea/workspace.xml
+#	modified:   JSCourse/3_CSS1/.DS_Store
+#	deleted:    JSCourse/3_CSS1/.idea/.name
+#	deleted:    JSCourse/3_CSS1/.idea/3_CSS1.iml
+#	deleted:    JSCourse/3_CSS1/.idea/encodings.xml
+#	deleted:    JSCourse/3_CSS1/.idea/misc.xml
+#	deleted:    JSCourse/3_CSS1/.idea/modules.xml
+#	deleted:    JSCourse/3_CSS1/.idea/scopes/scope_settings.xml
+#	deleted:    JSCourse/3_CSS1/.idea/vcs.xml
+#	deleted:    JSCourse/3_CSS1/.idea/workspace.xml
+#
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+#
+#	JSCourse/4_HTML_and_CSS/.DS_Store
