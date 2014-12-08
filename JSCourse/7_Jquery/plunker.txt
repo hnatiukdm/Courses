@@ -1,0 +1,4 @@
+function my_$(selector){
+    var domElements = document.querySelectorAll(selector);
+    return domElements;
+};
