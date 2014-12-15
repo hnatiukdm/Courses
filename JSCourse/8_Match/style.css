@@ -46,3 +46,18 @@ body > header a:last-child:after {
   display: block;
   font-size: 40px;
 }
+#signup-error, #login-error {
+    margin-top: 0px;
+    display: none;
+}
+#login-form input[type=text], #signup-form input[type=text] {
+    margin-bottom: 16px;
+}
+#list {
+    margin: 16px;
+}
+#signup, #list, #show-full {
+    display: none;
+}
+#ajax-load {display: none;}
+

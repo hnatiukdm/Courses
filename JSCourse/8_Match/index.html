@@ -25,10 +25,11 @@
     </ul>
 
     <section class="top-bar-section">
-      <ul class="left">
-        <li class="active"><a href="#login">Login</a></li>
-        <li><a href="#signup">Signup</a></li>
-        <li><a href="#list">List my dates!</a></li>
+      <ul id="navigation-list" class="left">
+        <li id="login-li" class="active"><a>Login</a></li>
+        <li id="signup-li"><a>Signup</a></li>
+        <li id="list-li"><a>List my dates!</a></li>
+        <li id="show-full-li"><a>Full info</a></li>
       </ul>
     </section>
   </nav>
@@ -37,53 +38,45 @@
         <div class="row">
           <div class="column small-offset-1 small-10 large-offset-2 large-8">
             <h1>Login</h1>
-            <form id="login-form" action="http://localhost:8888/login" method="post" class="small-8"> <!--  -->
+            <form id="login-form" action="http://api.sudodoki.name:8888/login" method="post" class="small-8"> <!--  -->
               <input class="error" required name="login" type="text" placeholder="enter your login">
-              <small class="error">Incorrect login or password. Or maybe both!</small>
+              <small class="error" id="login-error"></small>
               <input name="password" required type="password" placeholder="enter your password">
               <input type="submit" value="Log me in" class="button">
-              <a href="/signup" class="button secondary">Sign me up</a>
+              <a id="go-to-signup" class="button secondary">Sign me up</a>
             </form>
           </div>
         </div>
     </div>
-    <hr>
     <div id="signup">
       <div class="row">
         <div class="column small-offset-1 small-10 large-offset-2 large-8">
           <h1>Signup</h1>
           <form id="signup-form" method="post" action="http://api.sudodoki.name:8888/signup" class="small-8">
             <input class="error" name="login" type="text" placeholder="enter your login">
-            <small class="error">Something went wrong!</small>
+            <small class="error" id="signup-error"></small>
             <input name="email" type="email" placeholder="enter your email">
             <input name="password" type="password" placeholder="enter your new password">
             <input name="passwordConfirmation" type="password" placeholder="retype it">
             <input type="submit" value="Let me in!" class="button">
-            <a href="/login" class="button secondary">Nah, I do have an account already.</a>
+            <a id="go-to-login" class="button secondary">Nah, I do have an account already.</a>
           </form>
         </div>
       </div>
     </div>
-    <hr>
     <div id="list">
+        <ul id="persons-list" class="small-block-grid-3">
+        </ul>
     </div>
-    <hr>
     <div id="show-full">
-      <div>
-      <img src="ajax-loader.gif" alt="AJAX loader animation">
-      <h2>Mr. Know-it-all, I</h2>
-      <section>
-        <h3>Location</h3>
-        Street: 1212 mullholand drive, hollywood, LA, 12312
-      </section>
-      <section>
-        <h3>Connect with him!</h3>
-        <a href="mailto:knowitall@whitehouse.gov">knowitall@whitehouse.gov</a>
+        <div class="row">
+            <div id="show-full-placeholde">
 
-        <br/>
-        <a href="tel:38(098)#102">38(098)9991613</a>
-      </section>
-      </div>
+            </div>
+            <div id="ajax-load">
+                <img src="ajax-loader.gif" alt="AJAX loader animation">
+            </div>
+        </div>
     </div>
   <!--[if lt IE 7]><script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
   <script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script><![endif]-->
@@ -92,9 +85,21 @@
 
 
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-  <script src="jquery.validation.js"></script>
+  <script src="jquery.validate.js"></script>
   <script type="text/javascript">
       $(function() {
+          var listItemDivDictionary = new Array();
+          listItemDivDictionary["login"] = "#login-li";
+          listItemDivDictionary["signup"] = "#signup-li";
+          listItemDivDictionary["list"] = "#list-li";
+          listItemDivDictionary["show-full"] = "#show-full-li";
+
+          var mainDivs = [$('#login'), $('#signup'), $('#list'), $('#show-full')];
+
+          String.prototype.capitalize = function() {
+              return this.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+          };
+
           Handlebars.registerHelper('ifCond', function(v1, v2, options) {
               if(v1 === v2) {
                   return options.fn(this);
@@ -103,81 +108,212 @@
           });
 
           $.get('http://api.sudodoki.name:8888' + '/users').done(function(data) {
-              var source = $("#people-template");
-              var htmlSource = source.html();
-              var template = Handlebars.compile(htmlSource);
+              var template = Handlebars.compile($("#people-template").html());
               var people = data;
+
+              for (var i = 0; i < people.length; i ++ ){
+                  people[i].user.name.title = people[i].user.name.title.capitalize();
+                  people[i].user.name.first = people[i].user.name.first.capitalize();
+                  people[i].user.name.last = people[i].user.name.last.capitalize();
+              }
+
               var htmlCode = template(people);
-              $("#list").html(htmlCode);
+              $("#persons-list").html(htmlCode);
           });
-      });
 
-      $("#signup-form").submit(function(event){
-          alert(event);
+          $('#login-form :input').keypress(function() {
+              hideError('#login-error')
+          })
+
+          $('#signup-form :input').keypress(function() {
+              hideError('#signup-error')
+          })
+
+          $('#persons-list').on('click', '.human', function(e) {
+              var token = localStorage.getItem('token');
+              var url ='http://api.sudodoki.name:8888/user/' + this.id;
+
+              if (token === null || token === undefined || token === ''){
+                  alert('Please log in to access detailed info.');
+                  return;
+              }
+
+              $.ajax({
+                  url: url,
+                  type: 'get',
+                  dataType: 'json',
+                  headers: {"SECRET-TOKEN" : token},
+                  beforeSend: loadStart,
+                  complete: loadEnd
+              }).done(function(respond) {
+                          var template = Handlebars.compile($("#show-full-person").html());
+                          var personTemplate = {
+                              title: respond[0].user.name.title.capitalize(),
+                              last: respond[0].user.name.last.capitalize(),
+                              first: respond[0].user.name.first.capitalize(),
+                              street: respond[0].user.location.street,
+                              state: respond[0].user.location.state,
+                              city: respond[0].user.location.city,
+                              zip: respond[0].user.location.zip,
+                              email: respond[0].user.email,
+                              phone: respond[0].user.phone
+                          };
+
+                          var htmlCode = template(personTemplate);
+                          $("#show-full-placeholde").html(htmlCode);
+                      })
+                      .fail(function(error) {
+                          alert('error!' + error);
+                      })
+
+
+              function loadStart() {
+                  $('#ajax-load').show();
+              }
+
+              function loadEnd() {
+                  $('#ajax-load').hide();
+              }
+          })
+
+          $('#go-to-login').on('click', function(){
+              $('#login-li').click()
+          })
+
+
+          $('#go-to-signup').on('click', function(){
+              $('#signup-li').click()
+          })
+
+          $('#navigation-list').on('click', 'li', function(e) {
+              $('#navigation-list li').each(function(index, element) {
+                  $(element).removeClass('active');
+              })
+
+              $(this).addClass('active');
+              var activeDiv;
+
+              var nonActiveDivs = mainDivs.filter(function(el){
+                  var div = el;
+                  var isActive =  $(listItemDivDictionary[$(el)[0].id]).hasClass("active");
+                  if (isActive){
+                      activeDiv = div;
+                  }
+                  return !isActive;
+              });
+
+              $(activeDiv).css("display", "block");
+
+              $.each(nonActiveDivs, function(i, d){
+                  $(d).css("display", "none");
+              })
+          })
+
+          $("#login-form").submit(function(event){
+              event.preventDefault();
+
+              var loginInfo = $('#login-form').serialize();
+
+              $.ajax({
+                  url: 'http://api.sudodoki.name:8888/login',
+                  type: 'post',
+                  dataType: 'json',
+                  data: loginInfo
+              }).done(function(respond) {
+                          var token = respond.token;
+                          localStorage.setItem('token', token);
+                      })
+                      .fail(function(error) {
+                          var errorText = error.responseJSON.error;
+                          setError(errorText, '#login-error')
+                      })
+          })
+
+          $("#signup-form").submit(function(event){
+              event.preventDefault();
+
+              var loginInfo = $('#signup-form').serialize();
+
+              $.ajax({
+                  url: 'http://api.sudodoki.name:8888/signup',
+                  type: 'post',
+                  dataType: 'json',
+                  data: loginInfo
+              }).done(function(respond) {
+                          var token = respond.token;
+                          localStorage.setItem('token', token);
+                      })
+                      .fail(function(error) {
+                          var errors = error.responseJSON;
+                          var errorsArray = [];
+                          getErrors(errorsArray, errors);
+
+                          setError(errorsArray.join(".\n"), '#signup-error')
+                      })
+          })
+
+          function getErrors(errorsArray, objWithErrors){
+              if (errorsArray === undefined) errorsArray = [];
+              for (var prop in objWithErrors){
+                  if (objWithErrors.hasOwnProperty(prop)){
+                      if (typeof objWithErrors[prop] === 'string'){
+                          errorsArray.push(objWithErrors[prop]);
+                      }
+                      else{
+                          if (prop !== undefined && typeof objWithErrors[prop] === 'object')
+                              getErrors(errorsArray, objWithErrors[prop]);
+                      }
+                  }
+              }
+          }
+
+          function setError(errorText, errorElementId){
+              var errorElement = $(errorElementId);
+              errorElement.text(errorText);
+              errorElement.css("display", "block");
+              errorElement.css("margin-top", "-16px")
+          }
+
+          function hideError(errorElementId){
+              var errorElement = $(errorElementId);
+              errorElement.css("display", "none");
+          }
       })
-
-//      $(document).ready(function(){
-//
-//          $('#login-form').validate(
-//                  {
-//                      rules: {
-//                          login: {
-//                              required: true
-//                          },
-//                          password: {
-//                              required: true
-//                          }
-//                      },
-//                      messages: {
-//                          login: {
-//                              required: "specify login"
-//                          },
-//                          password: {
-//                              required: "specify password"
-//                          }
-//                      },
-//                      submitHandler: function (form) { // for demo
-//                          alert('valid form');
-//                          return false;
-//                      }
-//                  });
-//      });
   </script>
 
-
-
   <script id="people-template" type="text/x-handlebars-template">
-      <ul class="small-block-grid-3">
           {{#each .}}
-          <li>
+          <li id={{id}} class='human'>
                   {{#ifCond user.gender 'female'}}
                   <div class="person female">
-                      <a class='url n' href="#show-full"><i>{{user.name.title}}.</i> {{user.name.last}}, {{user.name.first}}</a>
+                      <a><i>{{user.name.title}}.</i> {{user.name.last}}, {{user.name.first}}</a>
                   </div>
                   {{else}}
                   <div class="person male">
-                      <a class='url n' href="#show-full"><i>{{user.name.title}}.</i> {{user.name.last}}, {{user.name.first}}</a>
+                      <a><i>{{user.name.title}}.</i> {{user.name.last}}, {{user.name.first}}</a>
                   </div>
                   {{/ifCond}}
-              </li>
-              {{/each}}
-          </ul>
+          </li>
+          {{/each}}
   </script>
 
-      </body>
-    </html>
-
-    <!-- <div id="your section">
-          <header>
-            <a href="logout">Log out</a>
-          </header>
-          <div id="main" role="main">
-
-          </div>
-          <footer>
-
-          </footer>
-        </div> -->
+  <script id="show-full-person" type="text/x-handlebars-template">
+      <div>
+          <h2>{{title}}. {{last}}, {{first}}</h2>
+          <section>
+              <h3>Location</h3>
+              Street: {{street}}, {{state}}, {{city}}, {{zip}}
+          </section>
+          <section>
+              <h3>Connect with him!</h3>
+              <a href="mailto:{{email}}">{{email}}</a>
+              <br/>
+              <a href="tel:#{{phone}}">{{phone}}</a>
+          </section>
+      </div>
+  </script>
+  </body>
+</html>
 
 
 
